@@ -77,3 +77,5 @@ service "azure-vote-front" created
 kubectl get service azure-vote-front --watch
 #azure-vote-front   LoadBalancer   10.0.34.242   52.179.23.131   80:30676/TCP   67s
 
+#Stop an AKS Cluster
+az aks stop --name myAKSCluster --resource-group myResourceGroup
