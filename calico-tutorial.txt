@@ -1,0 +1,6 @@
+az aks create --resource-group myResourceGroup --name myAKSCluster2 --node-count 2 --generate-ssh-keys --attach-acr jeffliacr --network-policy calico
+
+ 
+kubectl create ns mynamespace
+kubectl config set-context --current --namespace mynamespace
+kubectl apply -f https://raw.githubusercontent.com/mathieu-benoit/k8s-netpol/master/db-api-web-deployments.yaml
