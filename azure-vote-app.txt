@@ -1,10 +1,12 @@
 #Clone a sample application source from GitHub
-#Create a container image from the sample application source
-#Test the multi-container application in a local Docker environment
-
 git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
+
+#Create a container image from the sample application source
 cd azure-voting-app-redis
 docker-compose up -d
+
+#Test the multi-container application in a local Docker environment
+
 $ docker images
 docker ps   
 docker-compose down
