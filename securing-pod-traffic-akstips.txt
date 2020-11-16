@@ -1,0 +1,130 @@
+# AZ CLOUD SHELL #
+
+
+# CREATE AKS CLUSTER #
+RESOURCE_GROUP_NAME=akstips
+CLUSTER_NAME=tipsAndTricksAKSCluster
+LOCATION=eastus
+
+# Create a resource group
+az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
+
+# Create a virtual network and subnet
+az network vnet create \
+    --resource-group $RESOURCE_GROUP_NAME \
+    --name myVnet \
+    --address-prefixes 10.0.0.0/8 \
+    --subnet-name myAKSSubnet \
+    --subnet-prefix 10.240.0.0/16
+
+# Create a service principal and read in the application ID
+SP=$(az ad sp create-for-rbac --output json)
+SP_ID=$(echo $SP | jq -r .appId)
+SP_PASSWORD=$(echo $SP | jq -r .password)
+
+# Wait 15 seconds to make sure that service principal has propagated
+echo "Waiting for service principal to propagate..."
+sleep 15
+
+# Get the virtual network resource ID
+VNET_ID=$(az network vnet show --resource-group $RESOURCE_GROUP_NAME --name myVnet --query id -o tsv)
+
+# Assign the service principal Contributor permissions to the virtual network resource
+az role assignment create --assignee $SP_ID --scope $VNET_ID --role Contributor
+
+# Get the virtual network subnet resource ID
+SUBNET_ID=$(az network vnet subnet show --resource-group $RESOURCE_GROUP_NAME --vnet-name myVnet --name myAKSSubnet --query id -o tsv)
+
+# Create the AKS cluster and specify the virtual network and service principal information
+# Enable network policy by using the `--network-policy` parameter
+az aks create \
+    --resource-group $RESOURCE_GROUP_NAME \
+    --name $CLUSTER_NAME \
+    --node-count 1 \
+    --generate-ssh-keys \
+    --network-plugin azure \
+    --service-cidr 10.0.0.0/16 \
+    --dns-service-ip 10.0.0.10 \
+    --docker-bridge-address 172.17.0.1/16 \
+    --vnet-subnet-id $SUBNET_ID \
+    --service-principal $SP_ID \
+    --client-secret $SP_PASSWORD \
+    --network-policy azure
+
+#When the AKS cluster is created, run the following command to configure kubectl to connect to your Kubernetes cluster:
+
+az aks get-credentials --resource-group $RESOURCE_GROUP_NAME --name $CLUSTER_NAME
+
+#Run the following code to create a namespace called test:
+kubectl create namespace test
+kubectl label namespace/test purpose=test
+
+#create an example back-end pod that runs NGINX
+kubectl run backend --image=nginx --labels app=webapp,role=backend --namespace test --expose --port 80 --generator=run-pod/v1
+
+# create another pod and attach a terminal session to it, to test that we can reach the NGINX webpage:
+kubectl run --rm -it --image=alpine network-policy --namespace test --generator=run-pod/v1
+
+#Run the following command to try and get the webpage from the other pod. The output should be the HTML of the NGINX pod.
+wget -qO- http://backend
+
+##Deny all traffic
+
+
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: backend-policy
+  namespace: test
+spec:
+  podSelector:
+    matchLabels:
+      app: webapp
+      role: backend
+  ingress: []
+
+#apply the network policy by running this command:
+kubectl apply -f backend-policy.yaml
+
+#Test that all traffic is denied
+kubectl run --rm -it --image=alpine network-policy --namespace test --generator=run-pod/v1
+wget -qO- --timeout=2 http://backend
+
+#Allow specific traffic
+
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: backend-policy
+  namespace: test
+spec:
+  podSelector:
+    matchLabels:
+      app: webapp
+      role: backend
+  ingress:
+  - from:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          app: webapp
+          role: frontend
+
+
+##
+
+kubectl apply -f backend-policy.yaml
+kubectl run --rm -it frontend --image=alpine --labels app=webapp,role=frontend --namespace test --generator=run-pod/v1
+
+
+wget -qO- http://backend
+
+#Let's see if the network policy actually works. Let's create a pod that doesn't have the allowed labels and get the webpage from there:
+
+kubectl run --rm -it --image=alpine network-policy --namespace test --generator=run-pod/v1
+
+wget -qO- --timeout=2 http://backend
+
+
+
+
