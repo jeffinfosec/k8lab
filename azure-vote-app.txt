@@ -1,5 +1,4 @@
-### LOCAL DOCKER ENVIRONMENT ###
-
+# Use local docker environment
 #1. Clone a sample application from GitHub
 git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
 
@@ -19,60 +18,62 @@ docker system prune -a --volumes
 docker images -a -q | % { docker image rm $_ -f }
 Remove-Item 'azure-voting-app-redis' -Recurse -Force
 
-### AZSURE ###
-#6. Create Azure Resource Group
+#6. Azure CLI#
+az login
+az account show
+# Set subscription by Id
+az account set --subscription XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+# Set subscription by Name
+az account set --subscription "Company Subscription"
+az account show
+
+#7. Create Azure Resource Group
 az group create --name AVAResourceGroup --location westus
 
-#7. Create Resource Group and Azure Container Registry (ACR) instance
+#8. Create Resource Group and Azure Container Registry (ACR) instance
 az acr create --resource-group AVAResourceGroup --name avaacr --sku Basic
 
-#8. Display ARC login server
+#9. Display ARC login server
 az acr list --resource-group AVAResourceGroup --query "[].{acrLoginServer:loginServer}" --output table
 #avaacr.azurecr.io
 
-#9. Tag a container image for ACR
+#10. Tag a container image for ACR
 docker tag mcr.microsoft.com/azuredocs/azure-vote-front:v1 avaacr.azurecr.io/azure-vote-front:v1
 
-#10. Upload the image to ACR, #View images in your registry
+#11. Upload the image to ACR, #View images in your registry
 
 az acr login --name avaacr
-$ docker images
-$ docker push avaacr.azurecr.io/azure-vote-front:v1
+docker images
+docker push avaacr.azurecr.io/azure-vote-front:v1
 
-#11. list images
+#12. list images
 az acr repository list --name avaacr --output table
 
 #Install the Kubernetes CLI (kubectl)
 #Configure kubectl to connect to your AKS cluster
 
-#12. CREATE AKS CLUSTER
+#13. CREATE AKS CLUSTER
 az aks create --resource-group AVAResourceGroup --name AVAAKSCluster --node-count 2 --generate-ssh-keys --attach-acr avaacr 
 
-az aks install-cli
+#14. az aks install-cli
 az aks get-credentials --resource-group AVAResourceGroup --name AVAAKSCluster 
 
-#list acr login server
+#15. list acr login server
 az acr list --resource-group AVAResourceGroup --query "[].{acrLoginServer:loginServer}" --output table
 
-#Update a Kubernetes manifest files
+#16. Update a Kubernetes manifest files
 notepad azure-vote-all-in-one-redis.yaml
+
 ##containers:
 - name: azure-vote-front
   image: avaacr.azurecr.io/azure-vote-front:v1
 
-#Run an application in Kubernetes
+#17. Run an application in Kubernetes
 kubectl apply -f azure-vote-all-in-one-redis.yaml
 
-deployment "azure-vote-back" created
-service "azure-vote-back" created
-deployment "azure-vote-front" created
-service "azure-vote-front" created
 #kubectl get service azure-vote-front --watch
-#azure-vote-front   LoadBalancer   10.0.34.242   52.179.23.131   80:30676/TCP   67s
 #Test external IP address
-
-## Clean up
-
+#18. Clean up
 az aks stop --name AVAAKSCluster --resource-group AVAResourceGroup 
 az aks delete --name MyManagedCluster --resource-group MyResourceGroup
 az group delete --name ExampleResourceGroup
