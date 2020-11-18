@@ -24,13 +24,16 @@ az account show
 # Set subscription by Id
 az account set --subscription XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 # Set subscription by Name
-az account set --subscription "Company Subscription"
-az account show
 
+
+$SUBCRIPTION_NAME = "Azure Vote App"
 $RESOURCE_GROUP = "AVAResourceGroup" 
 $ACR = "avaacr"
 $AKS_CLUSTER = "AVAAKSCluster" 
 $ACR_LOGIN_SERVER = "avaacr.azurecr.io"
+
+az account set --subscription $SUBCRIPTION_NAME
+az account show
 
 #7. Create Azure Resource Group
 az group create --name $RESOURCE_GROUP --location westus
@@ -39,7 +42,7 @@ az group create --name $RESOURCE_GROUP --location westus
 az acr create --resource-group $RESOURCE_GROUP --name $ACR --sku Basic
 
 #9. Display ARC login server
-az acr list --resource-group AVAResourceGroup --query "[].{acrLoginServer:loginServer}" --output string
+az acr list --resource-group AVAResourceGroup --query "[].{acrLoginServer:loginServer}" --output table
 #avaacr.azurecr.io
 
 #10. Tag a container image for ACR
