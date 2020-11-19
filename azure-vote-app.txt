@@ -1,3 +1,9 @@
+$RESOURCE_GROUP = "AVAResourceGroup" 
+$ACR = "avaacr"
+$AKS_CLUSTER = "AVAAKSCluster" 
+$ACR_LOGIN_SERVER = "avaacr.azurecr.io"
+$SUBSCRIPTION = "AzureVoteApp"
+
 # Use local docker environment
 #1. Clone a sample application from GitHub
 git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
@@ -19,18 +25,16 @@ docker images -a -q | % { docker image rm $_ -f }
 Remove-Item 'azure-voting-app-redis' -Recurse -Force
 
 #6. Azure CLI#
+
+
 az login
 az account show
 # Set subscription by Id
 az account set --subscription XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 # Set subscription by Name
-az account set --subscription "Company Subscription"
+az account set --subscription $SUBSCRIPTION
 az account show
 
-$RESOURCE_GROUP = "AVAResourceGroup" 
-$ACR = "avaacr"
-$AKS_CLUSTER = "AVAAKSCluster" 
-$ACR_LOGIN_SERVER = "avaacr.azurecr.io"
 
 #7. Create Azure Resource Group
 az group create --name $RESOURCE_GROUP --location westus
