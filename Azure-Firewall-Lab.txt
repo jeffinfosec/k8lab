@@ -38,6 +38,8 @@ sleep 5 # wait for replication
 az role assignment create --role "Contributor" --assignee $SERVICE_PRINCIPAL_ID -g $KUBE_GROUP
 #az ad sp list
 
+##az ad sp list --filter "startswith(displayName,'$KUBE_NAME')" --query '[].{displayName:displayName,appDisplayName:appDisplayName, objectId:objectId,appId:appId,appOwnerTenantId:appOwnerTenantId}' -o table
+
 ## create 4 vnets - firewall subnet, appgateway subnet, k8 ingress, and k8 agent subnet
 az network vnet subnet create -g $KUBE_GROUP --vnet-name $KUBE_VNET_NAME -n $KUBE_FW_SUBNET_NAME --address-prefix 10.0.3.0/24
 az network vnet subnet create -g $KUBE_GROUP --vnet-name $KUBE_VNET_NAME -n $APPGW_SUBNET_NAME --address-prefix 10.0.2.0/24
