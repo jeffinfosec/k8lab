@@ -1,0 +1,9 @@
+Upgrade to the latest version
+Enable Role-Based Access Control (RBAC)
+Use namespaces to establish security boundaries
+Separate sensitive workloads
+Secure cloud metadata access
+Create and define cluster network policies
+Run a cluster-wide Pod Security Policy
+Harden node security
+Turn on audit logging

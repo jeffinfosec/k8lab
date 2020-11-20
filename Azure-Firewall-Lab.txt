@@ -1,19 +1,18 @@
-## Objects Created: 
-## AZURE CLOUD SHELL - USE BASH#
-
-## Set environment variables ##
-
-## here enter your subscription id
+## Objects Created: Resource Group, VNet, Firewall, LogAnalytic Workspace, Service Principal, 
+## Azure Cloud Bash - Bash ##
+## Subscription ID ##
 SUBSCRIPTION_ID=$(az account show --query id -o tsv) 
 SUBSCRIPTION_NAME="AzureFirewall"
 
-## here enter the resources group name of your AKS cluster
+## Resources group name of AKS cluster
 KUBE_GROUP="kubes_fw_knet" 
 KUBE_NAME="dzkubekube" # here enter the name of your kubernetes resource
 LOCATION="westeurope" # here enter the datacenter location
 
 ## Name of Vnet ###
 KUBE_VNET_NAME="knets" # here enter the name of your vnet
+
+## Name for 4 Subnets ## 
 KUBE_FW_SUBNET_NAME="AzureFirewallSubnet" # this you cannot change
 APPGW_SUBNET_NAME="gw-1-subnet"
 KUBE_ING_SUBNET_NAME="ing-4-subnet" # here enter the name of your ingress subnet
@@ -44,7 +43,6 @@ az network vnet subnet create -g $KUBE_GROUP --vnet-name $KUBE_VNET_NAME -n $KUB
 az network vnet subnet create -g $KUBE_GROUP --vnet-name $KUBE_VNET_NAME -n $APPGW_SUBNET_NAME --address-prefix 10.0.2.0/24
 az network vnet subnet create -g $KUBE_GROUP --vnet-name $KUBE_VNET_NAME -n $KUBE_ING_SUBNET_NAME --address-prefix 10.0.4.0/24
 az network vnet subnet create -g $KUBE_GROUP --vnet-name $KUBE_VNET_NAME -n $KUBE_AGENT_SUBNET_NAME --address-prefix 10.0.5.0/24 --service-endpoints Microsoft.Sql Microsoft.AzureCosmosDB Microsoft.KeyVault Microsoft.Storage
-
 
 #First we are going to configure the azure firewall public ip, the azure firewall itself and a log analytics workspace for firewall logs.
 
