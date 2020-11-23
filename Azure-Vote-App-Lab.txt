@@ -2,11 +2,13 @@ $RESOURCE_GROUP = "AVAResourceGroup"
 $ACR = "avaacr"
 $AKS_CLUSTER = "AVAAKSCluster" 
 $ACR_LOGIN_SERVER = "avaacr.azurecr.io"
-$SUBSCRIPTION = "AzureVoteApp"
+$SUBSCRIPTION_NAME  = "AzureVoteApp-Lab"
 
 # Use local docker environment
 #1. Clone a sample application from GitHub
-git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
+docker system prune -a --volumes
+docker images -a -q | % { docker image rm $_ -f }
+git clone https://github.com/Azure-Samples/azure-voting-app-redis
 
 #2. Create a container image
 cd azure-voting-app-redis
@@ -24,26 +26,25 @@ docker system prune -a --volumes
 docker images -a -q | % { docker image rm $_ -f }
 Remove-Item 'azure-voting-app-redis' -Recurse -Force
 
-#6. Azure CLI#
-
+#6. Azure CLI POWERSHELL#
 
 az login
 az account show
 # Set subscription by Id
+
 az account set --subscription XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 # Set subscription by Name
 <<<<<<< HEAD
-az account set --subscription $SUBSCRIPTION
+az account set --subscription $SUBSCRIPTION_NAME
 az account show
 
 =======
 
-
-$SUBCRIPTION_NAME = "Azure Vote App"
 $RESOURCE_GROUP = "AVAResourceGroup" 
 $ACR = "avaacr"
 $AKS_CLUSTER = "AVAAKSCluster" 
 $ACR_LOGIN_SERVER = "avaacr.azurecr.io"
+
 >>>>>>> b066b82aaad92f22d4850a68fc243d8940226408
 
 az account set --subscription $SUBCRIPTION_NAME
@@ -93,11 +94,18 @@ notepad azure-vote-all-in-one-redis.yaml
 #17. Run an application in Kubernetes
 kubectl apply -f azure-vote-all-in-one-redis.yaml
 
+kubectl get services
+kubectl get pods
+
 #kubectl get service azure-vote-front --watch
 #Test external IP address
 #18. Clean up
 az aks stop --name $AKS_CLUSTER --resource-group $RESOURCE_GROUP
-az aks delete --name $AKS_CLUSTER --resource-group $RESOURCE_GROUP
-az group delete --name $RESOURCE_GROUP
+az aks delete --name $AKS_CLUSTER --resource-group $RESOURCE_GROUP --yes
+az group delete --name $RESOURCE_GROUP --yes
+
+
+docker system prune -a --volumes
+docker images -a -q | % { docker image rm $_ -f }
 
 

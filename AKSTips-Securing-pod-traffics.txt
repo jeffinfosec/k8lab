@@ -70,19 +70,26 @@ kubectl run --rm -it --image=alpine network-policy --namespace test --generator=
 #Run the following command to try and get the webpage from the other pod. The output should be the HTML of the NGINX pod.
 wget -qO- http://backend
 
-#
 kubectl config get-contexts                          # display list of contexts 
 kubectl config current-context                       # display the current-context
 kubectl config use-context my-cluster-name           # set the default context to my-cluster-name
-
 # add a new user to your kubeconf that supports basic auth
 kubectl config set-credentials kubeuser/foo.kubernetes.com --username=kubeuser --password=kubepassword
 
 # permanently save the namespace for all subsequent kubectl commands in that context.
+kubectl config set-context --current --namespace=test
+
+
+# add a new user to your kubeconf that supports basic auth
+#kubectl config set-credentials kubeuser/foo.kubernetes.com --username=kubeuser --password=kubepassword
+
+# permanently save the namespace for all subsequent kubectl commands in that context.
 kubectl config set-context --current --namespace=ggckad-s2
+
 ##
 kubectl get services
 kubectl get pods
+kubectl get nodes
 ##
 
 
@@ -148,8 +155,11 @@ RESOURCE_GROUP_NAME=akstips
 CLUSTER_NAME=tipsAndTricksAKSCluster
 
 az aks stop --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP_NAME
-az aks delete --name $CLUSTER_NAMER --resource-group $RESOURCE_GROUP_NAME
-az group delete --name $RESOURCE_GROUP_NAME
+az aks delete --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP_NAME
+az group delete --name $RESOURCE_GROUP_NAME --yes
 
+
+DISPLAY_NAME_START='azure-cli'
+az ad sp list --filter "startswith(displayName,'$DISPLAY_NAME_START')" --query '[].{displayName:displayName,appDisplayName:appDisplayName, objectId:objectId,appId:appId,appOwnerTenantId:appOwnerTenantId}' -o table
 
 
